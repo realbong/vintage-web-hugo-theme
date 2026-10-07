@@ -89,8 +89,8 @@
                         <span class="post-meta-item">📊 {{ .WordCount }} words</span>
                     </div>
                     
-                    {{ with .Summary }}
-                    <div class="post-list-summary">{{ . | truncate 200 }}</div>
+                    {{ with .Description | default .Summary }}
+                    <div class="post-list-summary">{{ . | plainify | htmlUnescape | truncate 200 }}</div>
                     {{ end }}
                     
                     {{ with .Params.tags }}
@@ -135,8 +135,8 @@
                         {{ .Date.Format "Jan 2, 2006" }} • {{ .ReadingTime }} min read
                     </div>
                     
-                    {{ with .Summary }}
-                    <div class="card-summary" style="font-size: 9px; line-height: 1.3;">{{ . | truncate 100 }}</div>
+                    {{ with .Description | default .Summary }}
+                    <div class="card-summary" style="font-size: 9px; line-height: 1.3;">{{ . | plainify | htmlUnescape | truncate 100 }}</div>
                     {{ end }}
                 </div>
                 {{ end }}
@@ -149,9 +149,9 @@
             {{ if .Pages }}
             {{ range .Pages.GroupByDate "2006" }}
             <div class="archive-year">{{ .Key }}</div>
-            {{ range .Pages.GroupByDate "January" }}
-            <div class="archive-month">
-                <strong>{{ .Key }}</strong> ({{ len .Pages }} {{ if eq (len .Pages) 1 }}post{{ else }}posts{{ end }})
+            {{ range .Pages.GroupByDate "2006-01" }}
+            <div class="archive-month" id="archive-{{ .Key }}">
+                <strong>{{ (index .Pages 0).Date.Format "January" }}</strong> ({{ len .Pages }} {{ if eq (len .Pages) 1 }}post{{ else }}posts{{ end }})
                 <ul style="margin: 4px 0 8px 12px; font-size: 10px;">
                     {{ range .Pages.ByDate.Reverse }}
                     <li style="margin: 1px 0;">
@@ -253,6 +253,8 @@
 
 <script>
 function toggleView(viewType) {
+    if (!['list', 'grid', 'archive'].includes(viewType)) viewType = 'list';
+    if (!document.getElementById(viewType + 'Btn')) return;
     // Hide all views
     document.getElementById('listView').style.display = 'none';
     document.getElementById('gridView').style.display = 'none';
@@ -262,6 +264,7 @@ function toggleView(viewType) {
     document.querySelectorAll('.view-options .btn').forEach(btn => {
         btn.style.background = 'var(--button-face)';
         btn.style.border = '1px outset var(--button-face)';
+        btn.style.color = 'var(--text-primary)';
     });
     
     // Show selected view and highlight button
@@ -271,13 +274,22 @@ function toggleView(viewType) {
     document.getElementById(viewType + 'Btn').style.border = '1px inset var(--button-face)';
     
     // Store preference
-    localStorage.setItem('preferredView', viewType);
+    try { localStorage.setItem('preferredView', viewType); } catch (_) {}
 }
 
 // Restore preferred view on page load
 document.addEventListener('DOMContentLoaded', function() {
-    const preferredView = localStorage.getItem('preferredView') || 'list';
+    let preferredView = 'list';
+    try { preferredView = localStorage.getItem('preferredView') || 'list'; } catch (_) {}
+    if (location.hash.startsWith('#archive-')) preferredView = 'archive';
     toggleView(preferredView);
+    if (location.hash.startsWith('#archive-')) document.getElementById(location.hash.slice(1))?.scrollIntoView();
+});
+window.addEventListener('hashchange', function() {
+    if (location.hash.startsWith('#archive-')) {
+        toggleView('archive');
+        document.getElementById(location.hash.slice(1))?.scrollIntoView();
+    }
 });
 </script>
 {{ end }}

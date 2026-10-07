@@ -1,4 +1,5 @@
 {{ define "main" }}
+{{ if or .Content .Site.Params.show_welcome_message }}
 <div class="window">
     <div class="window-header">
         <span class="window-title">Welcome to {{ .Site.Title }}</span>
@@ -26,6 +27,7 @@
 </div>
 
 <!-- Featured Posts -->
+{{ end }}
 {{ $posts := where .Site.RegularPages "Type" "posts" }}
 {{ if $posts }}
 <div class="window">
@@ -54,8 +56,8 @@
                     </span>
                     {{ end }}
                 </div>
-                {{ with .Summary }}
-                <div class="post-list-summary">{{ . | truncate 150 }}</div>
+                {{ with .Description | default .Summary }}
+                <div class="post-list-summary">{{ . | plainify | htmlUnescape | truncate 150 }}</div>
                 {{ end }}
             </li>
             {{ end }}

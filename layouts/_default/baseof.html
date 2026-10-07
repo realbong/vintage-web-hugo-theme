@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ block "title" . }}{{ .Title }} | {{ .Site.Title }}{{ end }}</title>
+    <title>{{ block "title" . }}{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ .Title }} - {{ .Site.Title }}{{ end }}{{ end }}</title>
     
     <!-- Meta tags -->
     {{ with .Description }}
@@ -35,7 +35,7 @@
     {{ end -}}
     
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="{{ "favicon.ico" | relURL }}">
+    <link rel="icon" href="{{ .Site.Params.favicon | default "favicon.ico" | relURL }}">
     
     <!-- Styles -->
     {{ $css := resources.Get "css/main.css" | resources.Minify | resources.Fingerprint }}
@@ -46,6 +46,7 @@
     <style>{{ . | safeCSS }}</style>
     {{ end }}
     
+    {{ if templates.Exists "partials/head-extra.html" }}{{ partial "head-extra.html" . }}{{ end }}
     {{ block "head" . }}{{ end }}
 </head>
 <body>

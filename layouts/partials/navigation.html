@@ -69,9 +69,9 @@
         {{ end }}
 
         <!-- RSS Feed -->
-        {{ with .Site.Language.Locale }}
+        {{ with .Site.Home.OutputFormats.Get "RSS" }}
         <li class="nav-item">
-            <a href="{{ ($.Site.Home.OutputFormats.Get "RSS").RelPermalink | absURL }}" class="nav-link">📡 RSS</a>
+            <a href="{{ .RelPermalink }}" class="nav-link">📡 RSS</a>
         </li>
         {{ end }}
     </ul>

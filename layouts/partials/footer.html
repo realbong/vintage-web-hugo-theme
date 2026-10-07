@@ -32,8 +32,8 @@
                     {{ end }}
                     <div><a href="{{ "/categories/" | relLangURL }}">📂 Categories</a></div>
                     <div><a href="{{ "/tags/" | relLangURL }}">🏷️ Tags</a></div>
-                    {{ with .Site.Language.Locale }}
-                    <div><a href="{{ "/index.xml" | relLangURL }}">📡 RSS Feed</a></div>
+                    {{ with .Site.Home.OutputFormats.Get "RSS" }}
+                    <div><a href="{{ .RelPermalink }}">📡 RSS Feed</a></div>
                     {{ end }}
                 </div>
                 

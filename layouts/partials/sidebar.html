@@ -1,6 +1,6 @@
 <!-- Recent Posts -->
 {{ $recentPosts := where .Site.RegularPages "Type" "posts" | first 5 }}
-{{ if $recentPosts }}
+{{ if and $recentPosts (not .IsHome) }}
 <div class="sidebar-section">
     <div class="sidebar-title">📝 Recent Posts</div>
     <ul>
@@ -45,13 +45,14 @@
 {{ end }}
 
 <!-- Archives -->
-{{ if .Site.RegularPages }}
+{{ $posts := where .Site.RegularPages "Type" "posts" }}
+{{ if $posts }}
 <div class="sidebar-section">
     <div class="sidebar-title">📅 Archives</div>
     <ul>
-        {{ range .Site.RegularPages.GroupByDate "2006-01" }}
+        {{ range $posts.GroupByDate "2006-01" }}
         <li>
-            <a href="{{ "/posts/" | relLangURL }}{{ .Key }}/">
+            <a href="{{ "/posts/" | relLangURL }}#archive-{{ .Key }}">
                 {{ .Key }} ({{ len .Pages }})
             </a>
         </li>

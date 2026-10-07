@@ -1,0 +1,13 @@
+<link rel="canonical" href="{{ .Permalink }}">
+{{ with .Site.Params.googleSiteVerification }}<meta name="google-site-verification" content="{{ . }}">{{ end }}
+{{ with .Params.robots }}<meta name="robots" content="{{ . }}">{{ end }}
+{{ $description := .Description | default .Site.Params.description | plainify }}
+{{ $data := dict "@context" "https://schema.org" "@type" "WebPage" "name" .Title "description" $description "url" .Permalink }}
+{{ if .IsHome }}
+  {{ $data = dict "@context" "https://schema.org" "@type" "WebSite" "name" .Site.Title "description" $description "url" .Permalink }}
+{{ else if and .IsPage (eq .Section "posts") }}
+  {{ $author := dict "@type" "Person" "name" (.Site.Params.author | default .Site.Title) }}
+  {{ with .Site.Params.author_url }}{{ $author = merge $author (dict "url" (. | absURL)) }}{{ end }}
+  {{ $data = dict "@context" "https://schema.org" "@type" "BlogPosting" "headline" .Title "description" $description "url" .Permalink "author" $author "datePublished" (.Date.Format "2006-01-02T15:04:05Z07:00") "dateModified" (.Lastmod.Format "2006-01-02T15:04:05Z07:00") }}
+{{ end }}
+<script type="application/ld+json">{{ $data | jsonify | safeJS }}</script>

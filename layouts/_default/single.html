@@ -212,6 +212,7 @@
 </nav>
 
 <!-- Comments -->
+{{ if templates.Exists "partials/comments-extra.html" }}{{ partial "comments-extra.html" . }}{{ end }}
 {{ if .Site.Config.Services.Disqus.Shortname }}
 <div class="comments">
     <div class="window">
