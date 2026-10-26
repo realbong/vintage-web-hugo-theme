@@ -218,14 +218,7 @@ function initKeyboardNavigation() {
             window.location.href = '/posts/';
         }
         
-        // Escape to minimize all windows
-        if (e.key === 'Escape') {
-            document.querySelectorAll('.window .window-content').forEach(content => {
-                if (content.style.display !== 'none') {
-                    content.style.display = 'none';
-                }
-            });
-        }
+        // Escape is reserved for dismissing overlays; it must not hide page content.
         
         // F11 for fullscreen (show message)
         if (e.key === 'F11') {
@@ -277,15 +270,16 @@ function openLightbox(img) {
     lightbox.appendChild(lightboxImg);
     document.body.appendChild(lightbox);
     
-    lightbox.addEventListener('click', function() {
-        document.body.removeChild(lightbox);
-    });
+    function closeLightbox() {
+        lightbox.remove();
+        document.removeEventListener('keydown', closeHandler);
+    }
+    lightbox.addEventListener('click', closeLightbox);
     
     // ESC to close
     const closeHandler = function(e) {
         if (e.key === 'Escape') {
-            document.body.removeChild(lightbox);
-            document.removeEventListener('keydown', closeHandler);
+            closeLightbox();
         }
     };
     document.addEventListener('keydown', closeHandler);
@@ -358,37 +352,26 @@ function initSearch() {
 
 // Theme persistence
 function initThemePersistence() {
-    // Save scroll position
-    window.addEventListener('beforeunload', function() {
-        localStorage.setItem('scrollPosition', window.scrollY);
-    });
-    
-    // Restore scroll position
-    const savedPosition = localStorage.getItem('scrollPosition');
-    if (savedPosition) {
-        window.scrollTo(0, parseInt(savedPosition));
-        localStorage.removeItem('scrollPosition');
-    }
-    
-    // Remember window states
+    // Let the browser restore scroll for reload/back/forward. A single global
+    // scroll position incorrectly moves newly opened articles into the middle.
+    // Keep minimize preferences scoped to this page and this window's title.
     document.querySelectorAll('.window').forEach((window, index) => {
-        const savedState = localStorage.getItem(`window-${index}-minimized`);
+        const title = window.querySelector('.window-title')?.textContent.trim() || index;
+        const key = `vintage:${location.pathname}:window:${title}:minimized`;
+        let savedState;
+        try { savedState = localStorage.getItem(key); } catch (_) {}
+        const content = window.querySelector('.window-content');
+        if (!content) return;
         if (savedState === 'true') {
-            const content = window.querySelector('.window-content');
-            if (content) {
-                content.style.display = 'none';
-            }
+            content.style.display = 'none';
         }
         
         // Save state when minimized
         const minimizeBtn = window.querySelector('.window-button');
         if (minimizeBtn && minimizeBtn.textContent === '_') {
             minimizeBtn.addEventListener('click', function() {
-                setTimeout(() => {
-                    const content = window.querySelector('.window-content');
-                    const isMinimized = content.style.display === 'none';
-                    localStorage.setItem(`window-${index}-minimized`, isMinimized);
-                }, 200);
+                const isMinimized = content.style.display === 'none';
+                try { localStorage.setItem(key, isMinimized); } catch (_) {}
             });
         }
     });

@@ -1,4 +1,5 @@
 {{ define "main" }}
+{{ $pager := .Paginate .Pages.ByDate.Reverse }}
 <div class="window">
     <div class="window-header">
         <span class="window-title">
@@ -60,7 +61,7 @@
         <div id="listView" class="posts-view">
             {{ if .Pages }}
             <ul class="post-list">
-                {{ range .Pages.ByDate.Reverse }}
+                {{ range $pager.Pages }}
                 <li class="post-list-item">
                     {{ with .Params.featured_image }}
                     <div class="post-thumbnail" style="float: left; margin-right: 8px; margin-bottom: 4px;">
@@ -119,7 +120,7 @@
         <div id="gridView" class="posts-view" style="display: none;">
             {{ if .Pages }}
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 8px;">
-                {{ range .Pages.ByDate.Reverse }}
+                {{ range $pager.Pages }}
                 <div class="post-card" style="background: var(--bg-window); border: 1px outset var(--border-dark); padding: 8px;">
                     {{ with .Params.featured_image }}
                     <div class="card-image" style="margin-bottom: 6px;">
@@ -176,7 +177,7 @@
 <!-- Pagination -->
 {{ if .Paginator }}
 {{ if gt .Paginator.TotalPages 1 }}
-<div class="window">
+<div class="window pagination-window">
     <div class="window-header">
         <span class="window-title">📄 Page Navigation</span>
         <div class="window-controls" aria-hidden="true">
@@ -272,6 +273,9 @@ function toggleView(viewType) {
     document.getElementById(viewType + 'Btn').style.background = 'var(--highlight)';
     document.getElementById(viewType + 'Btn').style.color = 'white';
     document.getElementById(viewType + 'Btn').style.border = '1px inset var(--button-face)';
+    // Archive is a complete date index; only List and Grid are paginated.
+    const pagination = document.querySelector('.pagination-window');
+    if (pagination) pagination.style.display = viewType === 'archive' ? 'none' : '';
     
     // Store preference
     try { localStorage.setItem('preferredView', viewType); } catch (_) {}
